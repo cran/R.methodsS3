@@ -1,6 +1,6 @@
 Package: R.methodsS3
-Version: 1.2.0
-Date: 2010-03-13
+Version: 1.2.1
+Date: 2010-09-18
 Title: Utility function for defining S3 methods
 Author: Henrik Bengtsson <henrikb@braju.com>
 Maintainer: Henrik Bengtsson <henrikb@braju.com>
@@ -19,6 +19,8 @@ License: LGPL (>= 2.1)
 URL: http://www.braju.com/R/
 DevelURL: http://www.braju.com/R/
 LazyLoad: TRUE
-Packaged: 2010-03-13 11:11:24 UTC; hb
 Repository: CRAN
-Date/Publication: 2010-03-14 15:05:49
+Repository/R-Forge/Project: r-dots
+Repository/R-Forge/Revision: 409
+Date/Publication: 2010-09-25 06:18:00
+Packaged: 2010-09-20 20:49:30 UTC; rforge
