@@ -1,6 +1,6 @@
 Package: R.methodsS3
-Version: 1.2.2
-Date: 2010-11-17
+Version: 1.4.2
+Date: 2012-06-22
 Title: Utility function for defining S3 methods
 Author: Henrik Bengtsson <henrikb@braju.com>
 Maintainer: Henrik Bengtsson <henrikb@braju.com>
@@ -19,6 +19,6 @@ License: LGPL (>= 2.1)
 URL: http://www.braju.com/R/
 DevelURL: http://www.braju.com/R/
 LazyLoad: TRUE
-Packaged: 2012-02-29 01:59:23 UTC; hb
+Packaged: 2012-06-26 20:06:13 UTC; hb
 Repository: CRAN
-Date/Publication: 2012-06-27 13:50:40
+Date/Publication: 2012-06-28 05:42:37
