@@ -21,6 +21,7 @@
 #   \item{private, protected}{If \code{private=TRUE}, the method is declared
 #      private. If \code{protected=TRUE}, the method is declared protected.
 #      In all other cases the method is declared public.}
+#   \item{export}{A @logical setting attribute \code{"export"}.}
 #   \item{static}{If @TRUE this method is defined to be static,
 #      otherwise not. Currently this has no effect expect as an indicator.}
 #   \item{abstract}{If @TRUE this method is defined to be abstract,
@@ -40,16 +41,18 @@
 #      an exception will be thrown and the method will not be created.
 #      If \code{"warning"}, a @warning will be given and the method \emph{will}
 #      be created, otherwise the conflict will be passed unnotice.}
-#   \item{createGeneric}{If @TRUE, a generic S3/UseMethod function is
-#      defined for this method.}
+#   \item{createGeneric, exportGeneric}{If \code{createGeneric=TRUE}, 
+#      a generic S3/UseMethod function is defined for this method, 
+#      iff missing, and \code{exportGeneric} species attribute
+#      \code{"export"} of it.}
 #   \item{appendVarArgs}{If @TRUE, argument \code{...} is added with a
 #      warning, if missing.  For special methods such as \code{$} and 
-#      \code{[[}, this is never done.
+#      \code{[[}, this is never done (argument is ignored).
 #      This will increase the chances that the method is consistent with a
 #      generic function with many arguments and/or argument \code{...}.}
 #   \item{validators}{An optional @list of @functions that can be used
 #      to assert that the generated method meets certain criteria.}
-#   \item{...}{Not used.}
+#   \item{...}{Passed to @see "setGenericS3", iff called.}
 # }
 #
 # \examples{
@@ -65,7 +68,7 @@
 # @keyword "programming"
 # @keyword "methods"
 #*/###########################################################################
-setMethodS3.default <- function(name, class="default", definition, private=FALSE, protected=FALSE, static=FALSE, abstract=FALSE, trial=FALSE, deprecated=FALSE, envir=parent.frame(), overwrite=TRUE, conflict=c("warning", "error", "quiet"), createGeneric=TRUE, appendVarArgs=TRUE, validators=getOption("R.methodsS3:validators:setMethodS3"), ...) {
+setMethodS3.default <- function(name, class="default", definition, private=FALSE, protected=FALSE, export=FALSE, static=FALSE, abstract=FALSE, trial=FALSE, deprecated=FALSE, envir=parent.frame(), overwrite=TRUE, conflict=c("warning", "error", "quiet"), createGeneric=TRUE, exportGeneric=TRUE, appendVarArgs=TRUE, validators=getOption("R.methodsS3:validators:setMethodS3"), ...) {
   conflict <- match.arg(conflict);
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -93,8 +96,18 @@ setMethodS3.default <- function(name, class="default", definition, private=FALSE
   # Ignore argument 'appendVarArgs' if a "special" method 
   # or a replacement method.
   if (appendVarArgs) {
-    appendVarArgs <- !is.element(name, c("$", "$<-", "[[", "[[<-", "[", "[<-"));
-    appendVarArgs <- appendVarArgs && !(regexpr("<-", name) != -1);
+    # (a) Do not append '...' for the following methods
+    ignores <- c("$", "$<-", "[[", "[[<-", "[", "[<-");
+    ignores <- c(ignores, "==");
+    ignores <- c(ignores, "+", "-", "*", "/", "^", "%%", "%/%");
+    appendVarArgs <- !is.element(name, ignores);
+
+    if (appendVarArgs) {
+      # (b) Neither functions with any of these name patterns
+      ignorePatterns <- c("<-$", "^%[^%]*%$");
+      ignores <- (sapply(ignorePatterns, FUN=regexpr, name) != -1);
+      appendVarArgs <- appendVarArgs && !any(ignores);
+    }
   }
 
   # Check for forbidden names.
@@ -251,10 +264,17 @@ setMethodS3.default <- function(name, class="default", definition, private=FALSE
   # 6. Assign/create the new method
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   if (is.null(fcnDef) || overwrite == TRUE) {
-    eval(substitute({fcn <- definition; attr(fcn, "modifiers") <- modifiers},
-  	 list(fcn=as.name(methodName), definition=definition,
-  		   modifiers=modifiers)),
-  	 envir=envir);
+    # Create
+    expr <- substitute({
+        fcn <- definition;
+        R.methodsS3:::export(fcn) <- doExport;
+        attr(fcn, "S3class") <- class;
+        attr(fcn, "modifiers") <- modifiers;
+      }, list(fcn=as.name(methodName), class=class, definition=definition,
+              doExport=export, modifiers=modifiers)
+    );
+    # Assign
+    eval(expr, envir=envir);
   }
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -275,15 +295,33 @@ setMethodS3.default <- function(name, class="default", definition, private=FALSE
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # 8. Create a generic function?
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-  if (createGeneric == TRUE)
-    setGenericS3(name, envir=envir, validators=validators);
-}
+  if (createGeneric == TRUE) {
+    setGenericS3(name, export=exportGeneric, envir=envir, validators=validators, ...);
+  }
+} # setMethodS3.default()
+S3class(setMethodS3.default) <- "default";
+export(setMethodS3.default) <- FALSE;
 
 setGenericS3("setMethodS3");
 
 
 ############################################################################
 # HISTORY:
+# 2012-06-22
+# o Now setMethodS3(..., appendVarArgs=TRUE) ignores 'appendVarArgs' if
+#   the method name is "==", "+", "-", "*", "/", "^", "%%", or "%/%", 
+#   (in addition to "$", "$<-", "[[", "[[<-", "[", "[<-").  It will also
+#   ignore it if the name matches regular expressions "<-$" or "^%[^%]*%$".
+# 2012-04-17
+# o Added argument 'exportGeneric' to setMethodS3().
+# o Added argument 'export' to setMethodS3() and setGenericS3().
+# o Now setMethodS3() sets attribute "S3class" to the class.  This will
+#   make S3 methods such as a.b.c() non abigous, because it will be possible
+#   to infer whether the generic function is a() or a.b().  The reason for
+#   not using an attribute "S3method" = c("a.b", "c") is that the generic
+#   function should automaticly change if someone does d.e.c <- a.b.c.
+# 2012-03-08
+# o Now arguments '...' of setMethodS3() are passed to setGenericS3().
 # 2007-09-17
 # o Replaced 'enforceRCC' argument with more generic 'validators'.
 # 2007-06-09

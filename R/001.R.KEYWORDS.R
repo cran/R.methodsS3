@@ -1,4 +1,5 @@
 ###########################################################################/**
+# @eval "Rdoc$package <- 'R.methodsS3';''"
 # @RdocObject "R.KEYWORDS"
 #
 # @title "Reserved words in R not to be used for object names"
@@ -24,6 +25,7 @@ R.KEYWORDS <- c(
   paste("NA_", c("integer", "real", "complex", "character", "_", sep="")),
   "...", paste("..", 1:99, sep="")
 );
+export(R.KEYWORDS) <- FALSE;
   
      
 ############################################################################

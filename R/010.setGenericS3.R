@@ -17,6 +17,7 @@
 #
 # \arguments{
 #   \item{name}{The name of the generic function.}
+#   \item{export}{A @logical setting attribute \code{"export"}.}
 #   \item{envir}{The environment for where this method should be stored.}
 #   \item{ellipsesOnly}{If @TRUE, the only arguments in the generic function
 #      will be @....}
@@ -28,6 +29,8 @@
 #      to assert that the generated generic function meets certain 
 #      criteria.}
 #   \item{...}{Not used.}
+#   \item{overwrite}{If @TRUE an already existing generic function with
+#      the same name will be overwritten, otherwise not.}
 # }
 #
 # \examples{
@@ -61,7 +64,7 @@
 # @keyword "methods"
 # @keyword "internal"
 #*/###########################################################################
-setGenericS3.default <- function(name, envir=parent.frame(), ellipsesOnly=TRUE, dontWarn=getOption("dontWarnPkgs"), validators=getOption("R.methodsS3:validators:setGenericS3"), ...) {
+setGenericS3.default <- function(name, export=TRUE, envir=parent.frame(), ellipsesOnly=TRUE, dontWarn=getOption("dontWarnPkgs"), validators=getOption("R.methodsS3:validators:setGenericS3"), overwrite=FALSE, ...) {
 #  cat("setGenericS3(\"", name, "\", \"", get("class", envir=parent.frame()), "\", ...)\n", sep="");
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -153,7 +156,7 @@ setGenericS3.default <- function(name, envir=parent.frame(), ellipsesOnly=TRUE, 
     }
   }
 
-  if (!is.null(fcnDef)) {
+  if (!overwrite && !is.null(fcnDef)) {
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # 4a. Is it already a generic function?
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -185,7 +188,7 @@ setGenericS3.default <- function(name, envir=parent.frame(), ellipsesOnly=TRUE, 
     defaultExists <- FALSE;
     for (env in envirs) {
       if (exists(nameDefault, mode="function", envir=env, inherits=FALSE)) {
-        defaultExists <- TRUE
+        defaultExists <- TRUE;
         defaultPkg <- if (is.null(env)) "base" else attr(env, "name");
         break;
       }
@@ -207,12 +210,19 @@ setGenericS3.default <- function(name, envir=parent.frame(), ellipsesOnly=TRUE, 
       warning("Renamed the preexisting function ", name, " to ", 
         nameDefault, ", which was defined in environment ", fcnPkg, ".");
     }
-  }
+  } # if (...)
 
   # Create a generic function
-  src <- paste("\"", name, "\" <- function(...) UseMethod(\"", name, "\")", sep="");
-  eval(parse(text=src), envir=envir);
-}
+  src <- sprintf("...tmpfcn <- function(...) UseMethod(\"%s\")", name);
+  src <- c(src, sprintf("R.methodsS3:::export(...tmpfcn) <- %s", export));
+  src <- c(src, sprintf("\"%s\" <- ...tmpfcn", name));
+  src <- c(src, "rm(list=\"...tmpfcn\")");
+  src <- paste(src, collapse=";\n");
+  expr <- parse(text=src);
+  eval(expr, envir=envir);
+} # setGenericS3.default()
+S3class(setGenericS3.default) <- "default";
+export(setGenericS3.default) <- FALSE;
 
 setGenericS3.default("setGenericS3");  # Creates itself ;)
 
@@ -221,6 +231,10 @@ setGenericS3.default("setGenericS3");  # Creates itself ;)
 
 ############################################################################
 # HISTORY:
+# 2012-06-17
+# o Added argument 'overwrite' to setGenericS3().
+# 2012-04-17
+# o Added argument 'export' to setMethodS3() and setGenericS3().
 # 2007-09-17
 # o Replaced 'enforceRCC' argument with more generic 'validators'.
 # 2007-06-09
