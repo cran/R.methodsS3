@@ -1,3 +1,11 @@
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# IMPORTS
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# EXPORTS
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Export all public methods, that is, those without a preceeding dot
 # in their names.
 ##exportPattern("^[^\\.]")
@@ -17,6 +25,12 @@ export("isGenericS4")
 export("setGenericS3")
 export("setMethodS3")
 export("throw")
+export("pkgStartupMessage")
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# DECLARATIONS
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 S3method("appendVarArgs", "function")
 S3method("findDispatchMethodsS3", "default")
 S3method("getDispatchMethodS3", "default")
@@ -26,3 +40,8 @@ S3method("hasVarArgs", "function")
 S3method("setGenericS3", "default")
 S3method("setMethodS3", "default")
 S3method("throw", "default")
+S3method("pkgStartupMessage", "default")
+
+
+##export("startupMessage")
+##S3method("startupMessage", "default")
