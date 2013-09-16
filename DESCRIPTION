@@ -1,8 +1,8 @@
 Package: R.methodsS3
-Version: 1.5.0
+Version: 1.5.1
 Depends: R (>= 2.2.0)
 Imports: utils
-Date: 2013-08-29
+Date: 2013-09-15
 Title: Utility function for defining S3 methods
 Authors@R: c(person("Henrik", "Bengtsson", role=c("aut", "cre", "cph"),
                                           email = "henrikb@braju.com"))
@@ -11,7 +11,7 @@ Maintainer: Henrik Bengtsson <henrikb@braju.com>
 Description: Methods that simplify the setup of S3 generic functions and S3 methods.  Major effort has been made in making definition of methods as simple as possible with a minimum of maintenance for package developers.  For example, generic functions are created automatically, if missing, and naming conflict are automatically solved, if possible.  The method setMethodS3() is a good start for those who in the future may want to migrate to S4.  This is a cross-platform package implemented in pure R that generates standard S3 methods.
 License: LGPL (>= 2.1)
 LazyLoad: TRUE
-Packaged: 2013-09-11 16:30:29 UTC; hb
+Packaged: 2013-09-15 19:07:32 UTC; hb
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-09-12 08:23:25
+Date/Publication: 2013-09-16 00:44:42
