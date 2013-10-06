@@ -10,10 +10,10 @@
 \alias{isGenericS3.default}
 \alias{isGenericS3}
 
-\title{Checks if a function is a S3/UseMethod generic function}
+\title{Checks if a function is a S3 generic function}
 
 \description{
- Checks if a function is a S3/UseMethod generic function.
+ Checks if a function is a S3 generic function.
 }
 
 \usage{
@@ -28,9 +28,9 @@
 }
 
 \details{
-  A function is considered to be a generic S3/UseMethod function if its
-  body, that is the source code, contains the regular pattern
-  \code{"UseMethod[(]"}.
+  A function is considered to be a generic S3/UseMethod function if
+  its name matches one of the known S3 generic functions, or if it
+  calls \code{UseMethod()}.
 }
 
 \value{
@@ -41,7 +41,5 @@
 
 
 
-
 \keyword{programming}
 \keyword{methods}
-\keyword{internal}

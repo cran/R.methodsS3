@@ -1,7 +1,7 @@
 ###########################################################################/**
 # @RdocDefault getGenericS3
 #
-# @title "Get an S3 generic function"
+# @title "Gets an S3 generic function"
 #
 # \description{
 #  @get "title".
@@ -12,7 +12,9 @@
 # \arguments{
 #   \item{name}{The name of the generic function.}
 #   \item{envir}{The @environment from which the search for the
-#     generic @function is done.} 
+#     generic @function is done.}
+#   \item{inherits}{A @logical specifying whether the enclosing frames
+#     should be searched or not.}
 #   \item{...}{Not used.}
 # }
 #
@@ -24,19 +26,16 @@
 #
 # @author
 #
-# @keyword "programming"
-# @keyword "methods"
+# @keyword programming
+# @keyword methods
 #*/###########################################################################
-setMethodS3("getGenericS3", "default", function(name, envir=parent.frame(), ...) {
-  if (!exists(name, mode="function", envir=envir)) {
+setMethodS3("getGenericS3", "default", function(name, envir=parent.frame(), inherits=TRUE, ...) {
+  fcn <- .findFunction(name, envir=envir, inherits=inherits)$fcn;
+  if (is.null(fcn)) {
     throw("No such function found: ", name);
-  }
-
-  fcn <- get(name, mode="function", envir=envir);
-  if (!isGenericS3(fcn)) {
+  } else if (!isGenericS3(fcn)) {
     throw("The function found is not an S3 generic function: ", name);
   }
-
   fcn;
 })
 
@@ -44,6 +43,10 @@ setMethodS3("getGenericS3", "default", function(name, envir=parent.frame(), ...)
 
 ############################################################################
 # HISTORY:
+# 2013-10-06
+# o Now getGenericS3() uses .findFunction().
+# 2013-10-05
+# o Added argument 'inherits' to getGenericS3().
 # 2010-09-18
 # o BUG FIX: getGenericS3() failed to locate generic functions created
 #   in the global enviroment.
