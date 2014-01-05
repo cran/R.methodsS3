@@ -19,8 +19,6 @@
 #   \item{name}{The name of the generic function.}
 #   \item{export}{A @logical setting attribute \code{"export"}.}
 #   \item{envir}{The environment for where this method should be stored.}
-#   \item{ellipsesOnly}{If @TRUE, the only arguments in the generic function
-#      will be @....}
 #   \item{dontWarn}{If a non-generic method with the same name is found it
 #      will be "renamed" to a default method. If that method is found in
 #      a package with a name that is \emph{not} found in \code{dontWarn}
@@ -45,7 +43,15 @@
 # @keyword programming
 # @keyword methods
 #*/###########################################################################
-setGenericS3.default <- function(name, export=TRUE, envir=parent.frame(), ellipsesOnly=TRUE, dontWarn=getOption("dontWarnPkgs"), validators=getOption("R.methodsS3:validators:setGenericS3"), overwrite=FALSE, ...) {
+setGenericS3.default <- function(name, export=TRUE, envir=parent.frame(), dontWarn=getOption("dontWarnPkgs"), validators=getOption("R.methodsS3:validators:setGenericS3"), overwrite=FALSE, ...) {
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Validate arguments
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # Argument 'name':
+  if (nchar(name) == 0L) {
+    stop("Cannot set S3 generic method. Argument 'name' is empty.");
+  }
+
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Backward compatibility tests
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,8 +79,7 @@ setGenericS3.default <- function(name, export=TRUE, envir=parent.frame(), ellips
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   if (!is.null(validators)) {
     for (validator in validators) {
-      validator(name=name, envir=envir, ellipsesOnly=ellipsesOnly,
-                                   dontWarn=dontWarn, type="setGenericS3");
+      validator(name=name, envir=envir, dontWarn=dontWarn, type="setGenericS3");
     }
   }
 
@@ -160,8 +165,17 @@ setGenericS3.default <- function(name, export=TRUE, envir=parent.frame(), ellips
     }
   } # if (...)
 
+  # By default all generic functions have '...' arguments
+  argsStr <- "...";
+
+  # Should argument 'value' be added?
+  isReplacementFunction <- (regexpr("<-$", name) != -1L);
+  if (isReplacementFunction) {
+    argsStr <- paste(c(argsStr, "value"), collapse=", ");
+  }
+
   # Create a generic function
-  src <- sprintf("...tmpfcn <- function(...) UseMethod(\"%s\")", name);
+  src <- sprintf("...tmpfcn <- function(%s) UseMethod(\"%s\")", argsStr, name);
   src <- c(src, sprintf("R.methodsS3:::export(...tmpfcn) <- %s", export));
   src <- c(src, sprintf("\"%s\" <- ...tmpfcn", name));
   src <- c(src, "rm(list=\"...tmpfcn\")");
@@ -179,6 +193,16 @@ setGenericS3.default("setGenericS3");  # Creates itself ;)
 
 ############################################################################
 # HISTORY:
+# 2014-01-04
+# o CLEANUP: Dropped obsolete argument 'ellipsesOnly' from setGenericS3().
+#   It was not used internally anyway.  Thanks Antonio Piccolboni for
+#   reporting on this.
+# 2013-11-12
+# o BUG FIX: Generic function created by setGenericS3("foo<-") would not
+#   have a last argument name 'value', which 'R CMD check' complains about.
+# 2013-11-05
+# o ROBUSTNESS: Now setGenericS3(name, ...) asserts that argument
+#   'name' is non-empty.
 # 2013-10-06
 # o CLEANUP: setGenericS3() utilizes new .findFunction().
 # 2013-10-05
