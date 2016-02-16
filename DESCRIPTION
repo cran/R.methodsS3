@@ -1,8 +1,8 @@
 Package: R.methodsS3
-Version: 1.7.0
-Depends: R (>= 2.2.0)
+Version: 1.7.1
+Depends: R (>= 2.13.0)
 Imports: utils
-Date: 2015-02-19
+Date: 2016-02-15
 Title: S3 Methods Simplified
 Authors@R: c(person("Henrik", "Bengtsson", role=c("aut", "cre", "cph"),
                                           email = "henrikb@braju.com"))
@@ -12,6 +12,6 @@ Description: Methods that simplify the setup of S3 generic functions and S3 meth
 License: LGPL (>= 2.1)
 LazyLoad: TRUE
 NeedsCompilation: no
-Packaged: 2015-02-20 03:15:35 UTC; hb
+Packaged: 2016-02-16 03:21:35 UTC; hb
 Repository: CRAN
-Date/Publication: 2015-02-20 09:16:51
+Date/Publication: 2016-02-16 13:48:09
